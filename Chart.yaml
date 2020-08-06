@@ -1,0 +1,17 @@
+apiVersion: v1
+appVersion: "v1.3.0"
+description: Chart deploys a custom resource CassandraDatacenter with exporter for prometheus, service and service monitor for that.
+name: cassandradc-with-exporter
+version: 0.0.1
+sources:
+- https://github.com/powerhome/cassandradc-with-exporter
+maintainers:
+- name: Igor Blackman
+  email: igor.blackman@powerhrg.com
+- name: David Taylor
+  email: david.j.taylor@powerhrg.com
+keywords:
+- cassandra
+- cassandraDatacenter
+- cassandra-exporter
+home: https://github.com/powerhome/cassandradc-with-exporter

@@ -1,0 +1,28 @@
+{{- if .Values.exporter.enabled -}}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "cassandra.name" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ include "cassandra.name" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: "{{ .Release.Service }}"
+    release: "{{ .Release.Name }}"
+    cassandra.datastax.com/cluster: {{ .Values.clusterName }}
+    cassandra.datastax.com/datacenter: {{ .Values.datacenterName }}
+spec:
+  selector:
+    matchLabels:
+      cassandra.datastax.com/cluster: {{ .Values.clusterName }}
+      cassandra.datastax.com/datacenter: {{ .Values.datacenterName }}
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  endpoints:
+  - port: metrics
+    interval: 60s
+    scrapeTimeout: 59s
+    path: /metrics
+{{- end -}}

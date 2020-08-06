@@ -1,0 +1,74 @@
+---
+apiVersion: cassandra.datastax.com/v1beta1
+kind: CassandraDatacenter
+metadata:
+  labels:
+    app: {{ include "cassandra.name" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: "{{ .Release.Service }}"
+    release: "{{ .Release.Name }}"
+  name: {{ .Values.datacenterName }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  clusterName: {{ .Values.clusterName }}
+  serverType: cassandra
+  serverVersion: {{ .Values.serverVersion }}
+  managementApiAuth:
+  {{- toYaml .Values.managementApiAuth | nindent 4 }}
+  size: {{ .Values.size }}
+  storageConfig:
+    cassandraDataVolumeClaimSpec:
+      storageClassName: {{ .Values.storageConfig.storageClassName }}
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: {{ .Values.storageConfig.storage }}
+  config:
+    cassandra-yaml:
+    {{- toYaml .Values.config.cassandraYaml | nindent 6 }}
+    jvm-options:
+    {{- toYaml .Values.config.jvmOptions | nindent 6 }}
+  resources:
+  {{- toYaml .Values.resources | nindent 4 }}
+{{ if .Values.exporter.enabled -}}
+  podTemplateSpec:
+    spec:
+      containers:
+      - name: exporter
+        image: "{{ .Values.exporter.image }}:{{ .Values.exporter.tag }}"
+        env:
+          - name: CASSANDRA_EXPORTER_CONFIG_host
+            value: "127.0.0.1:7199"
+          - name: CASSANDRA_EXPORTER_CONFIG_listenPort
+            value: "{{ .Values.exporter.port }}"
+          - name: JVM_OPTS
+            value: "{{ .Values.exporter.jvmOpts }}
+              -XX:MaxRAMFraction=2
+              -XX:+AlwaysPreTouch
+              -Dorg.slf4j.simpleLogger.showDateTime=true
+              -Dorg.slf4j.simpleLogger.dateTimeFormat=\"yyyy-MM-dd'T'HH:mm:ss\"
+              -Dcom.sun.management.jmxremote.ssl=false
+              -Dcom.sun.management.jmxremote.authenticate=false
+              -Dcom.sun.management.jmxremote.port=5555
+              -Dcom.sun.management.jmxremote.local.only=false
+              -Dnetworkaddress.cache.ttl=15"
+        ports:
+        - name: metrics
+          containerPort: {{ .Values.exporter.port }}
+          protocol: TCP
+        - name: jmx
+          containerPort: 5555
+        livenessProbe:
+          tcpSocket:
+            port: {{ .Values.exporter.port }}
+          initialDelaySeconds: 180
+        readinessProbe:
+          httpGet:
+            path: /metrics
+            port: {{ .Values.exporter.port }}
+          initialDelaySeconds: 180
+          timeoutSeconds: 45
+        resources:
+        {{- toYaml .Values.exporter.resources | nindent 10 }}
+{{ end -}}

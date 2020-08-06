@@ -1,0 +1,7 @@
+DEPLOY SUCCESSFUL
+
+Deployment for `cassandradc-with-exporter` is running. You can get the running pods by:
+
+`kubectl get pods -n {{ .Release.Namespace }} -l app={{ include "cassandra.name" . }}`
+
+If the statefulset isn't created you probably have some misconfiguration with the cassandra-operator within the `{{ .Release.Namespace }}` namespace.

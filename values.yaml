@@ -1,0 +1,38 @@
+---
+datacenterName: dc1
+clusterName: clusterTest
+serverVersion: 3.11.6
+managementApiAuth:
+  insecure: {}
+size: 3
+storageConfig:
+  storageClassName: storageClass
+  storage: 5Gi
+config:
+  cassandraYaml:
+    authenticator: org.apache.cassandra.auth.PasswordAuthenticator
+    authorizer: org.apache.cassandra.auth.CassandraAuthorizer
+    role_manager: org.apache.cassandra.auth.CassandraRoleManager
+  jvmOptions:
+    initial_heap_size: 800M
+    max_heap_size: 800M
+resources:
+  limits:
+    cpu: "2"
+    memory: 3Gi
+  requests:
+    cpu: "2"
+    memory: 3Gi
+exporter:
+  enabled: false
+  image: criteord/cassandra_exporter
+  tag: "2.2.1"
+  port: 8081
+  jvmOpts: ""
+  resources:
+    limits:
+      cpu: 300m
+      memory: 500Mi
+    requests:
+      cpu: 300m
+      memory: 500Mi
